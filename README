@@ -42,8 +42,8 @@ AUTHOR
     David Davis <xantus@cpan.org>
 
 LICENSE
-    New BSD
+    Artistic
 
 SEE ALSO
-    POE JSON POE::Filter::Stackable POE::Filter::Line
+    POE, JSON::Any, POE::Filter::Stackable, POE::Filter::Line
 

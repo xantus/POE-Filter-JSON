@@ -2,7 +2,7 @@ Changes
 Makefile.PL
 MANIFEST
 README
-JSON.pm
+lib/POE/Filter/JSON.pm
 t/00_compile.t
 t/01_filter.t
 META.yml

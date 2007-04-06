@@ -5,10 +5,10 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
     'NAME'          => 'POE::Filter::JSON',
-    'VERSION_FROM'  => 'JSON.pm', # finds $VERSION
+    'VERSION_FROM'  => 'lib/POE/Filter/JSON.pm', # finds $VERSION
     'PREREQ_PM'     => {
         'Carp'      => undef,
-        'JSON'      => undef,
+        'JSON::Any' => 1.03,
     },
     'dist'         => {
         'SUFFIX'       => ".gz",

@@ -1,28 +1,28 @@
 package POE::Filter::JSON;
 
 use Carp;
-use JSON;
+use JSON::Any;
 
 use strict;
 use warnings;
 
 use base qw( POE::Filter );
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
-sub OBJ    () { 0 }
-sub BUFFER () { 1 }
+sub BUFFER () { 0 }
+sub OBJ    () { 1 }
 sub PARAMS () { 2 }
 
 sub new {
-    my $type = shift;
-    croak "$type requires an even number of parameters" if @_ % 2;
+    my $class = shift;
+    croak "$class requires an even number of parameters" if @_ % 2;
 
-    bless [
-        JSON->new(), # OBJ
-        '',          # BUFFER
+    bless( [
+        [],               # BUFFER
+        JSON::Any->new(), # OBJ
         { @_ },      # PARAMS
-    ], $type;
+    ], ref $class || $class );
 }
 
 sub get {
@@ -30,10 +30,10 @@ sub get {
     my $ret = [];
 
     foreach my $json (@$lines) {
-        if ( my $obj = $self->[ OBJ ]->jsonToObj( $json ) ) {
+        if ( my $obj = eval { $self->[ OBJ ]->jsonToObj( $json ) } ) {
             push( @$ret, $obj );
         } else {
-            warn "Couldn't convert json to an object\n";
+            warn "Couldn't convert json to an object: $@";
         }
     }
     return $ret;
@@ -41,7 +41,8 @@ sub get {
 
 sub get_one_start {
     my ($self, $lines) = @_;
-    push( @{ $self->[ BUFFER ] }, $_ ) for @{ $lines };
+    $lines = [ $lines ] unless ( ref( $lines ) );
+    push( @{ $self->[ BUFFER ] }, @{ $lines } );
 }
 
 sub get_one {
@@ -49,10 +50,10 @@ sub get_one {
     my $ret = [];
 
     if ( my $line = shift ( @{ $self->[ BUFFER ] } ) ) {
-        if ( my $json = $self->[ OBJ ]->jsonToObj( $line ) ) {
+        if ( my $json = eval { $self->[ OBJ ]->jsonToObj( $line ) } ) {
             push( @$ret, $json );
         } else {
-            warn "Couldn't convert json to object\n";
+            warn "Couldn't convert json to object: $@";
         }
     }
 
@@ -134,14 +135,11 @@ David Davis <xantus@cpan.org>
 
 =head1 LICENSE
 
-New BSD
+Artistic
 
 =head1 SEE ALSO
 
-L<POE>
-L<JSON>
-L<POE::Filter::Stackable>
-L<POE::Filter::Line>
+L<POE>, L<JSON::Any>, L<POE::Filter::Stackable>, L<POE::Filter::Line>
 
 =cut
 
