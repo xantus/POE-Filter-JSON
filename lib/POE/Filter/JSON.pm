@@ -8,7 +8,7 @@ use warnings;
 
 use base qw( POE::Filter );
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub BUFFER () { 0 }
 sub OBJ    () { 1 }
@@ -17,11 +17,12 @@ sub PARAMS () { 2 }
 sub new {
     my $class = shift;
     croak "$class requires an even number of parameters" if @_ % 2;
-
+    my %opts = @_;
+    my %anyopts = ( $opts{json_any} ) ? %{$opts{json_any}} : ();
     bless( [
-        [],               # BUFFER
-        JSON::Any->new(), # OBJ
-        { @_ },      # PARAMS
+        [],                         # BUFFER
+        JSON::Any->new( %anyopts ), # OBJ
+        \%opts,                     # PARAMS
     ], ref $class || $class );
 }
 
@@ -65,7 +66,7 @@ sub put {
     my $ret = [];
 
     foreach my $obj (@$objects) {
-        if ( my $json = $self->[ OBJ ]->objToJson( $obj, $self->[ PARAMS ] ) ) {
+        if ( my $json = eval { $self->[ OBJ ]->objToJson( $obj, $self->[ PARAMS ] ) } ) {
             push( @$ret, $json );
         } else {
             warn "Couldn't convert object to json\n";
@@ -87,7 +88,12 @@ POE::Filter::JSON - A POE filter using JSON
 
     use POE::Filter::JSON;
 
-    my $filter = POE::Filter::JSON->new();
+    my $filter = POE::Filter::JSON->new(
+        json_any => {
+            allow_nonref => 1,  # see the new() method docs
+        },
+        delimiter => 0,
+    );
     my $obj = { foo => 1, bar => 2 };
     my $json_array = $filter->put( [ $obj ] );
     my $obj_array = $filter->get( $json_array );
@@ -114,6 +120,7 @@ suitable for use with L<POE::Filter::Stackable>.  Preferably with L<POE::Filter:
 new
 
 Creates a new POE::Filter::JSON object. It takes arguments that are passed to objToJson() (as the 2nd argument). See L<JSON> for details.
+This module uses L<JSON::Any> internally.  To pass params to L<JSON::Any>'s new call, use json_any => { }
 
 =item *
 
