@@ -8,7 +8,7 @@ WriteMakefile(
     'VERSION_FROM'  => 'lib/POE/Filter/JSON.pm', # finds $VERSION
     'PREREQ_PM'     => {
         'Carp'      => undef,
-        'JSON::Any' => 1.03,
+        'JSON::Any' => 1.04,
     },
     'dist'         => {
         'SUFFIX'       => ".gz",

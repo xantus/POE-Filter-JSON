@@ -4,7 +4,12 @@ NAME
 SYNOPSIS
         use POE::Filter::JSON;
 
-        my $filter = POE::Filter::JSON->new();
+        my $filter = POE::Filter::JSON->new(
+            json_any => {
+                allow_nonref => 1,  # see the new() method docs
+            },
+            delimiter => 0,
+        );
         my $obj = { foo => 1, bar => 2 };
         my $json_array = $filter->put( [ $obj ] );
         my $obj_array = $filter->get( $json_array );
@@ -27,6 +32,8 @@ METHODS
 
         Creates a new POE::Filter::JSON object. It takes arguments that are
         passed to objToJson() (as the 2nd argument). See JSON for details.
+        This module uses JSON::Any internally. To pass params to JSON::Any's
+        new call, use json_any => { }
 
     *   get
 
